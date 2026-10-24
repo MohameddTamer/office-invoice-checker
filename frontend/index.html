@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office Invoice Checker — The Auditor's Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F7F2E7; --sheet:#FBF7EC; --ink:#1E1B16; --rule:#CFC6B4; --rule-dark:#8f8672;
+    --red:#B3402F; --dim:#6E6455;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif;
+    --mono:'IBM Plex Mono',ui-monospace,"SF Mono",Consolas,monospace;
+  }
+  *{box-sizing:border-box;border-radius:0}
+  body{margin:0;background:#E9E1CE;color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.5}
+  ::selection{background:var(--ink);color:var(--cream)}
+  :focus-visible{outline:1.5px solid var(--red);outline-offset:2px}
+  .sheet{max-width:1080px;margin:0 auto;background:var(--sheet);border-left:1px solid var(--rule);
+    border-right:1px solid var(--rule);padding:0 34px 56px;min-height:100vh}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* nameplate */
+  .masthead{border-top:6px solid var(--ink);margin-top:18px;padding-top:14px}
+  .masthead .rule2{border-top:1px solid var(--ink);margin-top:4px}
+  .nameplate{display:flex;gap:16px;align-items:center;padding:14px 0 4px}
+  .nameplate h1{font-size:34px;font-weight:900;margin:0;letter-spacing:.01em;line-height:1.05}
+  .nameplate h1 em{font-style:italic;font-weight:600}
+  .dateline{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    border-top:1px solid var(--ink);border-bottom:3px double var(--ink);
+    padding:5px 0;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--dim)}
+  .standfirst{font-size:17.5px;font-style:italic;margin:14px 0 4px;max-width:66ch}
+
+  /* sections are ruled, never boxed */
+  section.blk{border-top:3px double var(--ink);margin-top:30px;padding-top:16px}
+  .kicker{font-size:11px;letter-spacing:.22em;font-weight:700;text-transform:uppercase}
+  .kicker .red{color:var(--red)}
+  h2.sect{font-size:21px;font-weight:800;margin:2px 0 10px}
+
+  /* the audit desk: underlined fields, like a form filled in ink */
+  .controls{display:flex;gap:26px;flex-wrap:wrap;align-items:end}
+  .fld label{display:block;font-size:11px;letter-spacing:.18em;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+  input,select{font-family:var(--mono);font-size:14.5px;color:var(--ink);background:transparent;
+    border:0;border-bottom:1.5px solid var(--ink);padding:5px 2px;font-variant-numeric:tabular-nums}
+  input[type="date"]{min-width:150px}
+  input[type="number"]{-moz-appearance:textfield;appearance:textfield;width:110px}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+  select{appearance:none;-webkit-appearance:none;padding-right:22px;cursor:pointer;max-width:300px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%231E1B16' stroke-width='1.6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 4px center}
+  button{font-family:var(--serif);font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+    background:var(--ink);color:var(--cream);border:1px solid var(--ink);padding:9px 18px;cursor:pointer}
+  button:hover{background:var(--red);border-color:var(--red)}
+  button.ghost{background:transparent;color:var(--ink)}
+  button.ghost:hover{background:var(--ink);color:var(--cream)}
+
+  .headline-figure{margin:16px 0 2px}
+  .headline-figure .amount{font-family:var(--mono);font-weight:600;font-size:46px;color:var(--red);line-height:1.1}
+  .headline-figure .ccy{font-size:19px;color:var(--ink);font-family:var(--serif);font-weight:700}
+  .headline-figure .note{font-style:italic;color:var(--dim);font-size:14.5px}
+
+  /* office articles */
+  article.office{margin-top:34px}
+  .office-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);padding-bottom:5px}
+  .office-head h3{font-size:23px;font-weight:850;margin:0}
+  .office-head .per{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .office-stand{font-style:italic;font-size:15.5px;margin:8px 0 10px;max-width:72ch}
+
+  table{width:100%;border-collapse:collapse;background:transparent}
+  th,td{padding:7px 10px;text-align:left;font-size:14px;border-bottom:1px solid var(--rule)}
+  td+td,th+th{border-left:1px solid var(--rule)}
+  thead th{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+    border-top:2px solid var(--ink);border-bottom:1px solid var(--ink);color:var(--ink)}
+  td.n,th.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;font-size:13.5px}
+  th.n{text-align:right}
+  tr.flag td{background:rgba(179,64,47,.05)}
+  tr.tot td{border-top:3px double var(--ink);border-bottom:0;font-weight:600}
+  .finding{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+  .finding.over{color:var(--red)} .finding.under{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .finding.ok{color:var(--dim)}
+
+  /* the auditor's red pencil */
+  .varwrap{position:relative;display:inline-block;padding:1px 7px}
+  .varwrap .pencil{position:absolute;inset:-5px -3px;width:calc(100% + 6px);height:calc(100% + 10px);
+    overflow:visible;pointer-events:none;transform:rotate(-1.6deg)}
+  .varwrap .pencil path{fill:none;stroke:var(--red);stroke-width:2.4;stroke-linecap:round;
+    stroke-dasharray:1;stroke-dashoffset:1}
+  tr:hover .varwrap .pencil path, tr.show .varwrap .pencil path, .always .varwrap .pencil path{
+    stroke-dashoffset:0;transition:stroke-dashoffset .3s ease}
+  td.note{font-style:italic;color:var(--red);font-size:13.5px;min-width:170px}
+  td.note span{opacity:0;transition:opacity .25s ease}
+  tr:hover td.note span, tr.show td.note span{opacity:1}
+  .scroll{overflow-x:auto}
+
+  .repstrip{display:flex;gap:0;flex-wrap:wrap;border-top:2px solid var(--ink);border-bottom:3px double var(--ink)}
+  .repstrip div{padding:8px 18px 9px 0;margin-right:18px}
+  .repstrip .lab{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--dim);display:block}
+  .repstrip .val{font-family:var(--mono);font-size:19px;font-weight:600}
+  .chart svg{width:100%;height:auto;display:block}
+  .chart text{fill:var(--dim);font-size:12px;font-family:var(--mono)}
+  .legend{font-size:13px;font-style:italic;color:var(--dim);margin:8px 0 4px}
+  .legend i{display:inline-block;width:14px;height:11px;margin:0 6px 0 14px;vertical-align:-1px;border:1px solid var(--ink)}
+  .legend i:first-child{margin-left:0}
+
+  .filewrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .filewrap input[type="file"]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+  .filebtn{display:inline-block;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+    border:1.5px solid var(--ink);padding:8px 16px;cursor:pointer;background:transparent}
+  .filebtn:hover{background:var(--ink);color:var(--cream)}
+  .fname{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
+  pre.result{white-space:pre-wrap;font-family:var(--mono);font-size:12.8px;line-height:1.65;
+    border-left:3px solid var(--red);padding:8px 0 8px 14px;margin:14px 0 0}
+  .err{color:var(--red);font-size:13.5px;min-height:18px;font-style:italic}
+  p.dim{color:var(--dim);font-size:14px}
+  #login{max-width:420px;margin:9vh auto 0;border-top:3px double var(--ink);padding-top:18px}
+  #login h2{font-size:24px;font-weight:850;margin:0 0 4px}
+  #login .fld{margin:12px 0}
+  #login input{width:100%}
+  #login button{width:100%;margin-top:8px}
+  @media(max-width:680px){ .sheet{padding:0 16px 40px} .nameplate h1{font-size:26px}
+    .headline-figure .amount{font-size:34px} td.note{min-width:120px} }
+  @media (prefers-reduced-motion: reduce){ tr:hover .varwrap .pencil path{transition:none} }
+  @media print{
+    body{background:#fff}
+    .sheet{border:0;max-width:none;padding:0}
+    header.masthead,.no-print,#login,#controlsBlk,#importBlk,#addBlk{display:none !important}
+    #reportBlk{border-top:0;margin-top:0}
+    .headline-figure .amount{color:#000}
+    td.note span{opacity:1}
+    .varwrap .pencil path{stroke-dashoffset:0 !important}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+<header class="masthead">
+  <div class="nameplate">
+    <svg width="40" height="36" viewBox="0 0 34 30" aria-hidden="true"><g fill="none" stroke="#1E1B16" stroke-width="1.6"><rect x="1" y="1" width="32" height="28"/><path d="M17 1 V29"/><path d="M5 9 H13 M5 15 H13 M5 21 H13"/></g><ellipse cx="24" cy="19" rx="6.4" ry="4.5" fill="none" stroke="#B3402F" stroke-width="1.7" transform="rotate(-8 24 19)"/></svg>
+    <h1>The Office Invoice <em>Checker</em></h1>
+  </div>
+  <div class="rule2"></div>
+  <div class="dateline"><span>OUTSOURCING OFFICE INVOICES, AUDITED LINE BY LINE</span><span>ATTENDANCE · LEAVE · THE RECORD</span></div>
+  <p class="standfirst">The invoice says days. The record says days. Any difference between them shows up here, priced at the day rate — including the days a courier was billed for while he was on leave.</p>
+</header>
+<main>
+  <div id="login">
+    <h2>Accounts sign in</h2>
+    <p class="dim" style="font-style:italic;margin:0">Demo account: accounts / demo1234 (local only)</p>
+    <div class="fld"><label for="u">Username</label><input id="u" autocomplete="username"></div>
+    <div class="fld"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password"></div>
+    <button onclick="login()">Sign in</button>
+    <p class="err" id="err"></p>
+  </div>
+
+  <div id="app" style="display:none">
+    <section class="blk" id="controlsBlk" style="border-top:0;margin-top:22px">
+      <div class="kicker">The audit desk</div>
+      <h2 class="sect">Run the check</h2>
+      <div class="controls">
+        <div class="fld"><label for="from">From day</label><input type="date" id="from" value="2026-10-05"></div>
+        <div class="fld"><label for="to">To day</label><input type="date" id="to" value="2026-10-18"></div>
+        <div class="fld"><label for="rate">Day rate (EGP)</label><input type="number" id="rate" min="1"></div>
+        <button class="ghost" onclick="saveRate()">Save rate</button>
+        <button onclick="load()">Run the check</button>
+      </div>
+      <div class="headline-figure">
+        <div class="kicker"><span class="red">Total overbilled in this period</span> — money paid for days nobody worked</div>
+        <span class="ccy">EGP</span> <span class="amount" id="sOver">0</span>
+        <div class="note">Counted line by line below. Every figure in red pencil has an attendance sheet behind it.</div>
+      </div>
+    </section>
+
+    <div id="offices"></div>
+
+    <section class="blk" id="reportBlk">
+      <div class="kicker">For the wall and the file</div>
+      <h2 class="sect">The printable report <button class="ghost no-print" style="float:right" onclick="window.print()">Print report</button></h2>
+      <p class="num" id="repRange" style="margin:6px 0;font-size:13px"></p>
+      <div class="repstrip" id="repTotals"></div>
+      <h3 style="font-size:17px;font-weight:800;margin:18px 0 4px">Billed against worked, per office</h3>
+      <div class="chart" id="repChart"></div>
+      <p class="legend"><i style="background:var(--ink)"></i>Days on the invoice<i style="background:repeating-linear-gradient(45deg,transparent 0 3px,var(--ink) 3px 4px)"></i>Days actually worked</p>
+      <div class="scroll"><table id="repTable"></table></div>
+    </section>
+
+    <section class="blk no-print" id="importBlk">
+      <div class="kicker">Intake</div>
+      <h2 class="sect">Import invoice lines (CSV)</h2>
+      <p class="dim">Required columns: office_id, courier_id, from_day, to_day, billed_days. A line for the same office, courier and period is skipped as a duplicate and named in the import result; a broken line is rejected with its reason written out.</p>
+      <div class="filewrap">
+        <label class="filebtn" for="impFile">Choose CSV file</label>
+        <input type="file" id="impFile" accept=".csv,text/csv" onchange="document.getElementById('impName').textContent = this.files[0] ? this.files[0].name : 'no file chosen'">
+        <span class="fname" id="impName">no file chosen</span>
+        <button onclick="importCsv()">Import</button>
+      </div>
+      <pre class="result" id="impOut" style="display:none"></pre>
+    </section>
+
+    <section class="blk" id="addBlk">
+      <div class="kicker">By hand</div>
+      <h2 class="sect">Add an invoice line</h2>
+      <div class="controls">
+        <div class="fld"><label for="nCourier">Office and courier</label><select id="nCourier"></select></div>
+        <div class="fld"><label for="nFrom">From</label><input type="date" id="nFrom" value="2026-10-05"></div>
+        <div class="fld"><label for="nTo">To</label><input type="date" id="nTo" value="2026-10-18"></div>
+        <div class="fld"><label for="nBilled">Billed days</label><input type="number" id="nBilled" min="0" max="62" value="10"></div>
+        <button onclick="addLine()">Add line</button>
+      </div>
+      <p class="err" id="addErr"></p>
+    </section>
+  </div>
+</main>
+</div>
+
+<script>
+let token = sessionStorage.getItem('inv_token') || '';
+let officeData = [];
+const fmt = n => (+n).toLocaleString('en-US');
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+async function api(path, opts={}){
+  const r = await fetch(path, {headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'}, ...opts});
+  if(r.status === 401) throw new Error('auth');
+  return r;
+}
+async function login(){
+  const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({username: document.getElementById('u').value, password: document.getElementById('p').value})});
+  if(!r.ok){ document.getElementById('err').textContent = 'Wrong username or password.'; return; }
+  token = (await r.json()).token;
+  sessionStorage.setItem('inv_token', token);
+  load();
+}
+const FINDING = {overbilled:['over','Overbilled'], underbilled:['under','Underbilled'], ok:['ok','Matches']};
+function marginNote(l){
+  if(l.flag === 'overbilled') return l.present_but_on_leave > 0
+    ? `${l.present_but_on_leave} of the extra days were present-on-leave days. Start here.`
+    : `No attendance behind ${l.diff_days} billed ${l.diff_days === 1 ? 'day' : 'days'}.`;
+  if(l.flag === 'underbilled') return `Billed ${-l.diff_days} short. The office will find this before you do.`;
+  return 'Agrees with the record, to the day.';
+}
+function standfirst(o, lines){
+  if(o.overbilled_money > 0){
+    const worst = lines.filter(l => l.diff_days > 0).sort((a,b) => b.diff_days - a.diff_days)[0];
+    return `Billed ${o.billed_days} days against ${o.worked_days} actually worked. EGP ${fmt(o.overbilled_money)} over the record` +
+      (worst ? ` — the largest share sits on ${esc(worst.courier)}'s line: ${worst.diff_days} ${worst.diff_days === 1 ? 'day' : 'days'} with no attendance behind ${worst.diff_days === 1 ? 'it' : 'them'}.` : '.');
+  }
+  if(o.diff_money < 0)
+    return `Billed ${o.billed_days} days against ${o.worked_days} actually worked. The office billed short by EGP ${fmt(-o.diff_money)}; a corrected bill next period would surprise nobody.`;
+  return `Billed ${o.billed_days} days, worked ${o.worked_days}. The invoice and the record agree to the day. Nothing here for the red pencil.`;
+}
+const PENCIL = `<svg class="pencil" viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M50 5 C76 3 96 11 95.5 22 C95 34 73 41 47 40 C21 39 4.5 32 4.5 21 C4.5 10 25 4 52 5"/></svg>`;
+function moneyCell(l){
+  const v = `${l.diff_days > 0 ? '+' : ''}${fmt(l.diff_money)}`;
+  return l.flag === 'overbilled'
+    ? `<span class="varwrap"><span class="num">${v}</span>${PENCIL}</span>`
+    : `<span class="num">${v}</span>`;
+}
+async function load(){
+  const from = document.getElementById('from'), to = document.getElementById('to'), rate = document.getElementById('rate');
+  try{
+    const settings = await (await api('/api/settings')).json();
+    if(!rate.value) rate.value = settings.day_rate;
+    const check = await (await api(`/api/check?from=${from.value}&to=${to.value}`)).json();
+    const rep = await (await api(`/api/report?from=${from.value}&to=${to.value}`)).json();
+    renderReport(rep);
+    officeData = await (await api('/api/offices')).json();
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('sOver').textContent = fmt(check.total_overbilled_money);
+    const byOffice = {};
+    check.lines.forEach(l => { (byOffice[l.office] = byOffice[l.office] || []).push(l); });
+    document.getElementById('offices').innerHTML = check.offices.map(o => {
+      const lines = byOffice[o.office] || [];
+      const pol = lines.reduce((s,l) => s + l.present_but_on_leave, 0);
+      return `
+      <article class="office">
+        <div class="office-head"><h3>${esc(o.office)}</h3>
+          <span class="per">BILLED ${o.billed_days} DAYS · WORKED ${o.worked_days} DAYS · OVER EGP ${fmt(o.overbilled_money)}</span></div>
+        <p class="office-stand">${standfirst(o, lines)}</p>
+        <div class="scroll"><table>
+          <thead><tr><th>Courier</th><th>Period</th><th class="n">Billed</th><th class="n">Worked</th>
+          <th class="n">Present on leave</th><th class="n">Diff (days)</th><th class="n">Diff (EGP)</th>
+          <th>Finding</th><th>Auditor's note</th></tr></thead>
+          <tbody>
+          ${lines.map(l => `<tr class="${l.flag === 'overbilled' ? 'flag' : ''}" onclick="this.classList.toggle('show')">
+            <td style="font-weight:600">${esc(l.courier)}</td><td class="num" style="font-size:12.3px">${l.from_day} .. ${l.to_day}</td>
+            <td class="n">${l.billed_days}</td><td class="n">${l.worked_days}</td>
+            <td class="n">${l.present_but_on_leave}</td>
+            <td class="n">${l.diff_days > 0 ? '+' : ''}${l.diff_days}</td>
+            <td class="n">${moneyCell(l)}</td>
+            <td><span class="finding ${FINDING[l.flag][0]}">${FINDING[l.flag][1]}</span></td>
+            <td class="note"><span>${marginNote(l)}</span></td></tr>`).join('')}
+          <tr class="tot"><td>Office total</td><td></td><td class="n">${o.billed_days}</td><td class="n">${o.worked_days}</td>
+            <td class="n">${pol}</td><td class="n">${o.billed_days - o.worked_days > 0 ? '+' : ''}${o.billed_days - o.worked_days}</td>
+            <td class="n">${fmt(o.diff_money)}</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </article>`;
+    }).join('') || '<section class="blk"><p style="font-style:italic">No invoice lines fall inside this period.</p></section>';
+    document.getElementById('nCourier').innerHTML = officeData.offices.flatMap(o =>
+      o.couriers.map(c => `<option value="${o.id}:${c.id}">${esc(o.name)} · ${esc(c.name)}</option>`)).join('');
+  }catch(e){
+    document.getElementById('login').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+  }
+}
+function officeChart(offices){
+  if(!offices.length) return '<p style="font-style:italic">No data in this period.</p>';
+  const max = Math.max(...offices.flatMap(o => [o.billed_days, o.worked_days]), 1);
+  const W = 720, L = 160, rowH = 54;
+  const bw = v => Math.max(2, (W - L - 70) * v / max);
+  const rows = offices.map((o, i) => {
+    const y = i * rowH + 4;
+    return `<text x="${L - 10}" y="${y + 16}" text-anchor="end" style="fill:var(--ink);font-family:var(--serif);font-size:13.5px">${esc(o.office)}</text>` +
+      `<rect x="${L}" y="${y}" width="${bw(o.billed_days)}" height="15" fill="#1E1B16"><title>Billed: ${o.billed_days}</title></rect>` +
+      `<text x="${L + bw(o.billed_days) + 7}" y="${y + 13}">${o.billed_days}</text>` +
+      `<rect x="${L}" y="${y + 23}" width="${bw(o.worked_days)}" height="15" fill="url(#hatch)" stroke="#1E1B16"><title>Worked: ${o.worked_days}</title></rect>` +
+      `<text x="${L + bw(o.worked_days) + 7}" y="${y + 36}">${o.worked_days}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${offices.length * rowH + 8}" role="img" aria-label="billed versus worked days per office">
+    <defs><pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#FBF7EC"/><line x1="0" y1="0" x2="0" y2="6" stroke="#1E1B16" stroke-width="1.3"/>
+    </pattern></defs>${rows}</svg>`;
+}
+function renderReport(rep){
+  document.getElementById('repRange').textContent =
+    `Period: ${rep.from} .. ${rep.to} · Day rate: EGP ${fmt(rep.day_rate)}`;
+  document.getElementById('repTotals').innerHTML =
+    `<div><span class="lab">Invoice lines</span><span class="val">${rep.totals.line_count}</span></div>` +
+    `<div><span class="lab">Billed (days)</span><span class="val">${rep.totals.billed_days}</span></div>` +
+    `<div><span class="lab">Worked (days)</span><span class="val">${rep.totals.worked_days}</span></div>` +
+    `<div><span class="lab">Overbilled (EGP)</span><span class="val" style="color:var(--red)">${fmt(rep.total_overbilled_money)}</span></div>`;
+  document.getElementById('repChart').innerHTML = officeChart(rep.offices);
+  document.getElementById('repTable').innerHTML =
+    `<thead><tr><th>Office</th><th class="n">Billed (days)</th><th class="n">Worked (days)</th>
+     <th class="n">Difference (EGP)</th><th class="n">Of which overbilled</th></tr></thead><tbody>` +
+    rep.offices.map(o => `<tr><td style="font-weight:600">${esc(o.office)}</td><td class="n">${o.billed_days}</td>` +
+      `<td class="n">${o.worked_days}</td><td class="n">${fmt(o.diff_money)}</td>` +
+      `<td class="n">${fmt(o.overbilled_money)}</td></tr>`).join('') +
+    `<tr class="tot"><td>All offices</td><td class="n">${rep.totals.billed_days}</td><td class="n">${rep.totals.worked_days}</td>` +
+      `<td class="n">${fmt(rep.totals.diff_money)}</td><td class="n">${fmt(rep.total_overbilled_money)}</td></tr></tbody>`;
+}
+async function importCsv(){
+  const impFile = document.getElementById('impFile'), impOut = document.getElementById('impOut');
+  const f = impFile.files[0];
+  impOut.style.display = 'block';
+  if(!f){ impOut.textContent = 'Choose a CSV file first.'; return; }
+  const text = await f.text();
+  const r = await fetch('/api/import/invoice-lines', {method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'text/csv'}, body: text});
+  const d = await r.json();
+  impOut.textContent = r.ok
+    ? `Inserted ${d.inserted} lines. Skipped ${d.skipped_duplicates.length} duplicates: ` +
+      d.skipped_duplicates.map(x => `office ${x.office_id}, courier ${x.courier_id}, ${x.from_day}..${x.to_day}`).join(', ') +
+      `\nRejected ${d.rejected_rows.length} rows: ` +
+      d.rejected_rows.map(x => `row ${x.row}: ${x.reason}`).join('; ')
+    : ('Import failed: ' + (d.error || r.status));
+  if(r.ok) load();
+}
+async function saveRate(){
+  const rate = document.getElementById('rate');
+  const r = await api('/api/settings', {method:'POST', body: JSON.stringify({day_rate: parseFloat(rate.value)})});
+  if(!r.ok){ alert((await r.json()).error); return; }
+  load();
+}
+async function addLine(){
+  const sel = document.getElementById('nCourier');
+  const parts = sel.value.split(':');
+  const r = await api('/api/invoice-lines', {method:'POST', body: JSON.stringify({
+    office_id: parseInt(parts[0]), courier_id: parseInt(parts[1]),
+    from_day: document.getElementById('nFrom').value, to_day: document.getElementById('nTo').value,
+    billed_days: parseInt(document.getElementById('nBilled').value)})});
+  const addErr = document.getElementById('addErr');
+  if(!r.ok){ addErr.textContent = (await r.json()).error; return; }
+  addErr.textContent = '';
+  load();
+}
+if(token) load();
+</script>
+</body>
+</html>
