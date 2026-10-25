@@ -53,7 +53,7 @@ python3 tests/test_deepening.py   # import report, backup file, config, report s
 
 ## Architecture
 
-Python 3 standard library only, REST API over SQLite, a single page frontend that talks only to the API. The frontend is an editorial auditor's ledger — broadsheet rules, Fraunces serif, money in IBM Plex Mono, and a red pencil that circles what should not have been paid; DESIGN.md records the direction and what it deliberately avoids. Passwords are PBKDF2 hashes, bearer token auth on every data route, parameterised SQL, and an invoice line cannot be filed under an office the courier does not belong to. The layout is responsive and the tables scroll sideways on small screens, so it works from a computer, an Android phone, and an iOS phone, though in practice this is desk work. The demo runs locally, there is no public deployment.
+Python 3 standard library only, REST API over SQLite, a single page frontend that talks only to the API. The frontend is an editorial auditor's ledger, broadsheet rules, Fraunces serif, money in IBM Plex Mono, and a red pencil that circles what should not have been paid; DESIGN.md records the direction and what it deliberately avoids. Passwords are PBKDF2 hashes, bearer token auth on every data route, parameterised SQL, and an invoice line cannot be filed under an office the courier does not belong to. The layout is responsive and the tables scroll sideways on small screens, so it works from a computer, an Android phone, and an iOS phone, though in practice this is desk work. The demo runs locally, there is no public deployment.
 
 ## Known limitations
 

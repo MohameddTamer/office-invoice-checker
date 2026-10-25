@@ -1,4 +1,4 @@
-# Critique — Office Invoice Checker
+# Critique, Office Invoice Checker
 
 Method note: this project shipped without its own critique file in the
 first rounds; its build and deepening evidence lives in the
@@ -7,7 +7,7 @@ in ~/workspace/github-profile/). This file was opened for the redesign
 round and holds the redesign evidence; the numbers it protects were
 verified by hand there and are re-verified below.
 
-## Redesign — English-only editorial auditor's ledger (2026-10-24)
+## Redesign, English-only editorial auditor's ledger (2026-10-24)
 
 The owner rejected the previous skin as a design he had seen before
 and ordered two things: everything user facing in English, and a
@@ -43,7 +43,7 @@ What changed:
 Evidence:
 - Tests before the redesign: tests/test_api.py passed (assert-based;
   it asserts the seeded totals directly), tests/test_deepening.py 52
-  checks passed. After: both pass unchanged — test_api "Invoice
+  checks passed. After: both pass unchanged, test_api "Invoice
   checker api tests passed", test_deepening 52 of 52.
 - Numbers unchanged, and they are asserted inside test_api.py itself,
   so the passing suite is the proof: the seeded period totals
@@ -53,7 +53,7 @@ Evidence:
   Hassan M. +3 days, +1,350 with 3 present-on-leave days; Youssef A.
   billed a day short, -450, flagged underbilled; Omar E. exact.
   Per office: North Gate Office 450, Delta Lines 900, Sahel Partners
-  1,350 — same as the hand-checked figures recorded at build time.
+  1,350, same as the hand-checked figures recorded at build time.
 - A scan of the project tree finds zero Arabic characters in code,
   page, tests and docs after the conversion.
 
@@ -69,11 +69,11 @@ Honest notes on the direction:
   left out for scope, recorded here rather than hidden.
 - The standfirst for a clean office says there is nothing for the red
   pencil. True today; a period where every office is clean renders
-  three quiet articles, and the headline figure reads EGP 0 — still
+  three quiet articles, and the headline figure reads EGP 0, still
   set in red, because the figure's color is fixed by the stylesheet
   rather than by its value. That is the one place the color rule
   bends, and it is visible here rather than explained away.
 - The page was verified in markup, CSS and script syntax
   (node --check), and by the API tests reading it from the booted
-  server — not rendered in a device browser in this round, same
+  server, not rendered in a device browser in this round, same
   limit as before.
