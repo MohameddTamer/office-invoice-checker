@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Office Invoice Checker — The Auditor's Ledger</title>
+<title>Office Invoice Checker, The Auditor's Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -143,7 +143,7 @@
   </div>
   <div class="rule2"></div>
   <div class="dateline"><span>OUTSOURCING OFFICE INVOICES, AUDITED LINE BY LINE</span><span>ATTENDANCE · LEAVE · THE RECORD</span></div>
-  <p class="standfirst">The invoice says days. The record says days. Any difference between them shows up here, priced at the day rate — including the days a courier was billed for while he was on leave.</p>
+  <p class="standfirst">The invoice says days. The record says days. Any difference between them shows up here, priced at the day rate, including the days a courier was billed for while he was on leave.</p>
 </header>
 <main>
   <div id="login">
@@ -167,7 +167,7 @@
         <button onclick="load()">Run the check</button>
       </div>
       <div class="headline-figure">
-        <div class="kicker"><span class="red">Total overbilled in this period</span> — money paid for days nobody worked</div>
+        <div class="kicker"><span class="red">Total overbilled in this period</span>, money paid for days nobody worked</div>
         <span class="ccy">EGP</span> <span class="amount" id="sOver">0</span>
         <div class="note">Counted line by line below. Every figure in red pencil has an attendance sheet behind it.</div>
       </div>
@@ -245,7 +245,7 @@ function standfirst(o, lines){
   if(o.overbilled_money > 0){
     const worst = lines.filter(l => l.diff_days > 0).sort((a,b) => b.diff_days - a.diff_days)[0];
     return `Billed ${o.billed_days} days against ${o.worked_days} actually worked. EGP ${fmt(o.overbilled_money)} over the record` +
-      (worst ? ` — the largest share sits on ${esc(worst.courier)}'s line: ${worst.diff_days} ${worst.diff_days === 1 ? 'day' : 'days'} with no attendance behind ${worst.diff_days === 1 ? 'it' : 'them'}.` : '.');
+      (worst ? `, the largest share sits on ${esc(worst.courier)}'s line: ${worst.diff_days} ${worst.diff_days === 1 ? 'day' : 'days'} with no attendance behind ${worst.diff_days === 1 ? 'it' : 'them'}.` : '.');
   }
   if(o.diff_money < 0)
     return `Billed ${o.billed_days} days against ${o.worked_days} actually worked. The office billed short by EGP ${fmt(-o.diff_money)}; a corrected bill next period would surprise nobody.`;
